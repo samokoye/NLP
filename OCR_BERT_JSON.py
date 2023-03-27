@@ -408,3 +408,43 @@ image_path = 'medical_note.jpg'
 text = ocr(image_path)
 generated_data = generate_medical_data(text)
 print(generated_data)
+
+
+'''
+To build an alternative model to AWS Comprehend Medical, we need to perform natural language processing (NLP) tasks such as named entity recognition 
+(NER), relationship extraction, and sentiment analysis on medical texts. Here is an example of Python code that can be used to build such a model:
+'''
+
+import spacy
+from spacy import displacy
+from spacy.tokens import Span
+import pandas as pd
+import numpy as np
+
+# Load the pre-trained Spacy model
+nlp = spacy.load('en_core_web_sm')
+
+# Define medical entity labels
+medical_entities = ['SYMPTOM', 'DISEASE', 'DRUG', 'GENE', 'CHEMICAL', 'PROCEDURE']
+
+# Define custom entity matcher
+def add_medical_entities(matcher, doc, i, matches):
+    match_id, start, end = matches[i]
+    entity = Span(doc, start, end, label=match_id)
+    doc.ents += (entity,)
+
+# Add custom entity matcher to the pipeline
+matcher = spacy.matcher.Matcher(nlp.vocab)
+for entity in medical_entities:
+    matcher.add(entity, add_medical_entities, [{'LOWER': entity.lower()}])
+
+# Define a function to extract medical entities
+def extract_medical_entities(text):
+    doc = nlp(text)
+    matches = matcher(doc)
+    return [(ent.text, ent.label_) for ent in doc.ents]
+
+# Test the function
+text = "The patient has been diagnosed with lung cancer and prescribed chemotherapy."
+entities = extract_medical_entities(text)
+print(entities)
