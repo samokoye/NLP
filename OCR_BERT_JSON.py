@@ -15,6 +15,7 @@ techniques for medical images. By using these techniques, you can generate a lar
 machine learning models for various medical applications.
 '''
 --================--==============--============
+'''
 To build a machine learning model that can read the text inside a medical document image, create synthetic data and structure the information 
 into sections in a JSON format, we can follow the following steps:
 
@@ -45,18 +46,187 @@ Evaluate the model's performance on a test set using metrics such as precision, 
 Refine the model by fine-tuning the hyperparameters and adjusting the architecture as necessary.
 Once the model is trained and evaluated, it can be used to extract the text from medical documents, create synthetic data, and structure the information 
 into a JSON format automatically. This can help save time and improve the accuracy of the information extracted from medical documents.
+'''
+--================--============
+'''
+1. Data pre-processing and image extraction
+The first step would be to extract the text from the image. This can be done using Optical Character Recognition (OCR) techniques. Here's some sample code to extract the text from an image using the Tesseract OCR engine:
+python
+'''
+import pytesseract
+from PIL import Image
+
+# Load image
+image = Image.open('medical_document.jpg')
+
+# Extract text using OCR
+text = pytesseract.image_to_string(image)
+
+
+'''
+Text cleaning and pre-processing
+The extracted text may contain noise and unwanted characters. We need to clean and preprocess the text before feeding it to our machine learning model. 
+Here's some sample code to clean the text:
+'''
+import re
+
+# Remove unwanted characters and symbols
+text = re.sub('[^a-zA-Z0-9\n\.]', ' ', text)
+
+# Remove excess whitespace
+text = ' '.join(text.split())
+
+#OR
+import re
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+
+# Remove special characters from the text
+text = re.sub(r'\W', ' ', text)
+
+# Convert the text to lowercase
+text = text.lower()
+
+# Tokenize the text
+tokens = word_tokenize(text)
+
+# Remove stop words from the tokens
+stop_words = set(stopwords.words('english'))
+tokens = [word for word in tokens if not word in stop_words]
+
+# Lemmatize the tokens
+lemmatizer = WordNetLemmatizer()
+tokens = [lemmatizer.lemmatize(word) for word in tokens]
+
+# Join the tokens back into a string
+text = ' '.join(tokens)
 
 
 
+'''
+3. Named Entity Recognition (NER)
+The next step is to extract relevant entities such as names, locations, and dates from the text. This can be done using Named Entity Recognition (NER) 
+techniques. Here's some sample code to extract named entities using the spaCy library:
+'''
+import spacy
+
+# Load the spaCy model
+nlp = spacy.load('en_core_web_sm')
+
+# Process the text with spaCy
+doc = nlp(text)
+
+# Extract named entities
+entities = [{'text': ent.text, 'label': ent.label_} for ent in doc.ents]
+
+#OR
+
+import spacy
+
+# Load the spaCy model
+nlp = spacy.load('en_core_web_sm')
+
+# Perform semantic analysis on the text
+doc = nlp(text)
+
+# Extract the entities from the analyzed text
+entities = []
+for ent in doc.ents:
+    entities.append((ent.text, ent.label_))
+
+'''
+4. Synthesizing Data
+Now that we have extracted the relevant entities, we can generate synthetic data based on this. Here's some sample code to generate synthetic 
+data using the Faker library:
+'''
+from faker import Faker
+
+# Initialize Faker with a seed value for reproducibility
+fake = Faker(seed=123)
+
+# Generate synthetic data based on the extracted entities
+data = {}
+for entity in entities:
+    if entity['label'] == 'PERSON':
+        data['patient_name'] = entity['text']
+        data['patient_address'] = fake.address()
+        data['patient_email'] = fake.email()
+    elif entity['label'] == 'DATE':
+        data['date'] = entity['text']
+    elif entity['label'] == 'DISEASE':
+        data['disease'] = entity['text']
+    elif entity['label'] == 'MEDICATION':
+        data['medication'] = entity['text']
+
+#OR
+
+# Create synthetic data from the extracted entities
+data = {}
+for entity in entities:
+    if entity[1] in data:
+        data[entity[1]].append(entity[0])
+    else:
+        data[entity[1]] = [entity[0]]
+        
+'''
+5. Structuring Data into JSON Format
+Finally, we need to structure the extracted and synthesized data into a JSON format. Here's some sample code to do this:
+'''
+import json
+
+# Structure the data into a JSON format
+json_data = json.dumps({
+    'patient': {
+        'name': data.get('patient_name', ''),
+        'address': data.get('patient_address', ''),
+        'email': data.get('patient_email', ''),
+    },
+    'date': data.get('date', ''),
+    'disease': data.get('disease', ''),
+    'medication': data.get('medication', ''),
+})
+
+# Print the JSON data
+print(json_data)
 
 
+--=======---===============--====================
 
+#SAMPLE
+#train a NER model using spaCy
+import spacy
+from spacy.tokens import Doc, Span, Token
 
+# Load a blank spaCy model
+nlp = spacy.blank("en")
 
+# Define the entity labels
+LABELS = ["PATIENT_NAME", "ILLNESS", "SYMPTOMS", "MEDICATION", "DOSAGE"]
 
+# Define the training data
+TRAIN_DATA = [
+    ("John Smith has a fever", {"entities": [(0, 10, "PATIENT_NAME"), (20, 25, "ILLNESS"), (26, 31, "SYMPTOMS")]}),
+    ("Mary Johnson is taking aspirin", {"entities": [(0, 12, "PATIENT_NAME"), (21, 28, "MEDICATION")]}),
+    ("Bob Miller is allergic to peanuts", {"entities": [(0, 10, "PATIENT_NAME"), (20, 27, "SYMPTOMS")]}),
+    ("Jane Brown is prescribed 500mg of antibiotics", {"entities": [(0, 9, "PATIENT_NAME"), (23, 35, "MEDICATION"), (36, 40, "DOSAGE")]}),
+]
 
+# Add the entity recognizer to the pipeline
+ner = nlp.create_pipe("ner")
+nlp.add_pipe(ner)
 
+# Add the labels to the entity recognizer
+for label in LABELS:
+    ner.add_label(label)
 
+# Train the NER model
+for _, annotations in TRAIN_DATA:
+    for ent in annotations.get("entities"):
+        ner.add_label(ent[2])
+    example = Doc(nlp.vocab, words=_.split())
+    example.ents = [Span(example, start=ent[0], end=ent[1], label=ent[2]) for ent in annotations.get("entities")]
+    nlp.update([example], [annotations])
 
 --==========---=============---=======--------===================
         +-------------------+
