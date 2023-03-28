@@ -1,4 +1,247 @@
 '''
+produce two sentences similar to the following medical note below:
+“Mr brown was admitted to our hospital, the lady of the lake medical 
+center on the 3rd of March 2023. Brown has a heart disease and chronic back pain. 
+After receiving professional treatment, bed rest was prescribed to him”
+'''
+#The result was:
+'''
+"Ms. Smith was admitted to St. Joseph's Hospital on March 10th, 2023, with a diagnosis 
+of pneumonia and asthma. Following medical intervention, Ms. Smith was advised to undergo 
+a period of rest and recovery."
+
+"Mr. Johnson presented to the emergency department 
+at Mercy Hospital on March 15th, 2023, with symptoms 
+of a stroke. A comprehensive medical examination was 
+conducted, and it was determined that Mr. Johnson required 
+rest and rehabilitation to aid in his recovery."
+'''
+
+"""
+here's an example code using the spaCy library to perform
+ medical named entity recognition on the sentences generated
+ by the previous code and output the results in a JSON format:
+"""
+import spacy
+import random
+import json
+
+# load the spaCy model for medical named entity recognition
+nlp = spacy.load("en_ner_bc5cdr_md")
+
+patient_names = ["Ms. Johnson", "Mr. Rodriguez", "Mrs. Smith", "Mr. Lee", "Ms. Nguyen", "Mr. Patel", "Mrs. Garcia", "Mr. Kim", "Ms. Williams", "Mr. Brown"]
+hospital_names = ["Memorial Hospital Center", "St. Francis Medical Center", "Central Hospital", "Riverside Medical Center", "Green Valley Hospital", "Fairview Hospital", "Pineview Medical Center", "Sunnybrook Hospital", "Oakdale Regional Medical Center", "Parkside Medical Center"]
+conditions_list = ["hypertension and shortness of breath", "heart attack, diabetes, and high blood pressure", "cancer and chronic pain", "asthma and allergies", "pneumonia and bronchitis", "depression and anxiety", "fractured arm and concussion", "migraines and seizures", "kidney stones and UTI", "rheumatoid arthritis and fibromyalgia"]
+treatment_list = ["rest and avoidance of strenuous activity", "treatment, rest, and adherence to a strict diet and exercise regimen", "chemotherapy and radiation therapy", "inhaled medications and nebulizer treatments", "antibiotics and breathing treatments", "counseling and therapy sessions", "immobilization and physical therapy", "medications and lifestyle modifications", "pain management and surgery", "medications and physical therapy"]
+
+results = []
+
+for i in range(100):
+    patient_name = random.choice(patient_names)
+    hospital_name = random.choice(hospital_names)
+    conditions = random.choice(conditions_list)
+    treatment = random.choice(treatment_list)
+    admission_date = f"{random.randint(1, 31)}-{random.choice(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])}-{random.randint(2022, 2023)}"
+    
+    sentence1 = f"{patient_name} was admitted to {hospital_name} on {admission_date}. {patient_name} has a history of {conditions}."
+    sentence2 = f"Following medical evaluation and treatment, {patient_name} has been advised to {treatment} for a period of time."
+    
+    # perform medical named entity recognition on both sentences
+    doc1 = nlp(sentence1)
+    doc2 = nlp(sentence2)
+    
+    # extract named entities and their labels
+    entities1 = [{"text": ent.text, "label": ent.label_} for ent in doc1.ents]
+    entities2 = [{"text": ent.text, "label": ent.label_} for ent in doc2.ents]
+    
+    # combine the named entities from both sentences
+    entities = entities1 + entities2
+    
+    # create a dictionary with the sentence and its named entities
+    result = {"sentence1": sentence1, "sentence2": sentence2, "entities": entities}
+    
+    # add the dictionary to the list of results
+    results.append(result)
+
+# write the results to a JSON file
+with open("medical_ner_results.json", "w") as f:
+    json.dump(results, f, indent=2)
+
+#This code uses the spaCy model en_ner_bc5cdr_md to 
+#perform medical named entity
+
+##########
+'''
+here are three medical notes with different sentence structures:
+
+"Following a thorough evaluation, 
+Mr. Johnson was admitted to our medical facility on March 25th, 2023, 
+with a diagnosis of pneumonia and hypertension. After administering 
+appropriate treatment, we recommended a brief period of observation to 
+monitor his progress."
+"Ms. Garcia arrived at our hospital on April 10th, 2023, 
+with a history of diabetes and hypertension. 
+After conducting a series of tests and evaluations, 
+we determined that surgery was necessary. 
+Following the procedure, we initiated a personalized 
+care plan to facilitate her recovery."
+"On May 2nd, 2023, Mr. Patel was transferred 
+to our facility with a diagnosis of acute myocardial infarction. 
+We immediately began administering treatment and monitoring his condition. 
+After several days of observation, we recommended a course of physical therapy 
+to aid in his recovery."
+'''
+import random
+
+diagnoses = [('pneumonia', 'hypertension'),
+             ('diabetes', 'hypertension'),
+             ('acute myocardial infarction',)]
+
+admissions = [('March 25th, 2023', 'Mr. Johnson'),
+              ('April 10th, 2023', 'Ms. Garcia'),
+              ('May 2nd, 2023', 'Mr. Patel')]
+
+treatments = [('observation', 'progress'),
+              ('surgery', 'recovery'),
+              ('physical therapy', 'recovery')]
+
+sentences = []
+for i in range(3):
+    diagnosis = random.choice(diagnoses)
+    admission = random.choice(admissions)
+    treatment = random.choice(treatments)
+    
+    sentence = f"On {admission[0]}, {admission[1]} was admitted to our medical facility with a diagnosis of {diagnosis[0]} and {diagnosis[1]}. After administering appropriate treatment, we recommended a brief period of {treatment[0]} to monitor {treatment[1]}."
+    sentences.append(sentence)
+
+print(sentences)
+##########
+"""
+here's the Python code to produce 500
+ medical notes with unique sentence 
+structures and illnesses, and save the 
+results in both JSON and Pandas DataFrame 
+formats:
+"""
+import random
+import pandas as pd
+import json
+
+diagnoses = [('pneumonia', 'hypertension'),
+             ('diabetes', 'hypertension'),
+             ('acute myocardial infarction',),
+             ('cancer', 'heart disease'),
+             ('asthma', 'chronic obstructive pulmonary disease'),
+             ('malaria',),
+             ('gastrointestinal infection', 'food poisoning'),
+             ('kidney stones',)]
+
+admissions = [('March 25th, 2023', 'Mr. Johnson'),
+              ('April 10th, 2023', 'Ms. Garcia'),
+              ('May 2nd, 2023', 'Mr. Patel'),
+              ('June 5th, 2023', 'Ms. Lee'),
+              ('July 15th, 2023', 'Mr. Rodriguez'),
+              ('August 1st, 2023', 'Ms. Singh'),
+              ('September 18th, 2023', 'Mr. Chen'),
+              ('October 21st, 2023', 'Ms. Kim'),
+              ('November 11th, 2023', 'Mr. Davis'),
+              ('December 23rd, 2023', 'Ms. Hernandez')]
+
+treatments = [('observation', 'progress'),
+              ('surgery', 'recovery'),
+              ('physical therapy', 'recovery'),
+              ('medication', 'symptoms'),
+              ('radiation therapy', 'tumor'),
+              ('chemotherapy', 'cancer'),
+              ('dietary changes', 'digestive health'),
+              ('rest', 'fatigue'),
+              ('oxygen therapy', 'breathing')]
+
+sentences = []
+for i in range(500):
+    diagnosis = random.choice(diagnoses)
+    admission = random.choice(admissions)
+    treatment = random.choice(treatments)
+    
+    sentence_structure = random.choice(range(1, 4))
+    if sentence_structure == 1:
+        sentence = f"On {admission[0]}, {admission[1]} was admitted to our medical facility with a diagnosis of {diagnosis[0]} and {diagnosis[1]}. After administering appropriate treatment, we recommended a brief period of {treatment[0]} to monitor {treatment[1]}."
+    elif sentence_structure == 2:
+        sentence = f"{admission[1]} was admitted to our hospital on {admission[0]} with {diagnosis[0]} and {diagnosis[1]} diagnoses. Following a series of tests, {treatment[0]} was recommended to manage {treatment[1]}."
+    else:
+        sentence = f"With a diagnosis of {diagnosis[0]} and {diagnosis[1]}, {admission[1]} arrived at our facility on {admission[0]}. After receiving professional treatment, we prescribed a course of {treatment[0]} to aid in {treatment[1]} management."
+    sentences.append(sentence)
+
+# Save the sentences in JSON format
+with open('medical_notes.json', 'w') as f:
+    json.dump(sentences, f)
+
+# Save the sentences in a Pandas DataFrame format
+df = pd.DataFrame({'Medical Notes': sentences})
+df.to_csv('medical_notes.csv', index=False)
+######
+
+"""
+here's an updated Python code that generates 
+500 medical notes with unique doctor's name 
+and hospital stay duration:
+"""
+import random
+import json
+
+doctors = ['Dr. Smith', 'Dr. Johnson', 'Dr. Williams', 'Dr. Brown', 'Dr. Davis']
+illnesses = ['diabetes', 'migraine', 'pneumonia', 'asthma', 'cancer']
+verbs = ['was diagnosed with', 'is suffering from', 'has been admitted with', 'is being treated for', 'is experiencing']
+admissions = ['admitted to', 'checked into', 'brought to', 'transferred to', 'referred to']
+hospitals = ['St. Mary\'s Hospital', 'University Hospital', 'Johns Hopkins Hospital', 'Mayo Clinic', 'Massachusetts General Hospital']
+durations = ['for a week', 'for 10 days', 'for two weeks', 'for a month', 'for several months']
+
+notes = []
+
+for i in range(500):
+    doctor = random.choice(doctors)
+    illness = random.choice(illnesses)
+    verb = random.choice(verbs)
+    admission = random.choice(admissions)
+    hospital = random.choice(hospitals)
+    duration = random.choice(durations)
+    
+    sentence_structure = random.randint(1, 4) # choose a random sentence structure
+    if sentence_structure == 1:
+        sentence = f"{doctor} admitted the patient with {illness} to {hospital} and prescribed bed rest for {duration}."
+    elif sentence_structure == 2:
+        sentence = f"{doctor} diagnosed the patient with {illness} and referred them to {hospital} for further treatment. The patient stayed in the hospital for {duration}."
+    elif sentence_structure == 3:
+        sentence = f"The patient was {admission} {hospital} and {doctor} treated them for {illness}. The hospital stay lasted {duration}."
+    else:
+        sentence = f"{doctor} is currently treating the patient for {illness} at {hospital} and expects a hospital stay of {duration}."
+    
+    note = {
+        'doctor': doctor,
+        'sentence': sentence
+    }
+    
+    notes.append(note)
+
+# save result in json file
+with open('medical_notes.json', 'w') as f:
+    json.dump(notes, f)
+
+# convert to dataframe (optional)
+import pandas as pd
+
+df = pd.DataFrame(notes)
+print(df.head())
+
+######
+
+"""
+
+"""
+
+
+
+'''
 Generating lots of medical data based on just one sample medical data is a challenging task, but it is possible with the 
 help of machine learning techniques such as data augmentation.
 
